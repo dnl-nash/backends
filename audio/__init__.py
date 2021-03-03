@@ -130,7 +130,7 @@ class WindowsAudioPlayer(AudioPlayer):
     types = ('wav','mp3')
 
     def __init__(self,*args,**kwargs):
-        import winplay
+        from . import winplay
         self._player = winplay
         self.audio = None
         self.event = threading.Event()
@@ -161,7 +161,7 @@ class WindowsAudioPlayer(AudioPlayer):
     def available(ext=None):
         if not sys.platform.startswith('win'): return False
         try:
-            import winplay #@analysis:ignore
+            from . import winplay #@analysis:ignore
             return True
         except:
             util.ERROR('winplay import failed',hide_tb=True)
@@ -201,7 +201,7 @@ class SubprocessAudioPlayer(AudioPlayer):
         self._wavProcess = subprocess.Popen(self._pipeArgs,stdin=subprocess.PIPE,stdout=(open(os.path.devnull, 'w')), stderr=subprocess.STDOUT)
         try:
             shutil.copyfileobj(source,self._wavProcess.stdin)
-        except IOError,e:
+        except IOError as e:
             if e.errno != errno.EPIPE:
                 util.ERROR('Error piping audio',hide_tb=True)
         except:
@@ -391,7 +391,7 @@ class Mpg321OEPiAudioPlayer(SubprocessAudioPlayer):
         self._wavProcess = subprocess.Popen('mpg321 - --wav - | aplay',stdin=subprocess.PIPE,stdout=(open(os.path.devnull, 'w')), stderr=subprocess.STDOUT,env=self.env,shell=True)
         try:
             shutil.copyfileobj(source,self._wavProcess.stdin)
-        except IOError,e:
+        except IOError as e:
             if e.errno != errno.EPIPE:
                 util.ERROR('Error piping audio',hide_tb=True)
         except:

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os, ctypes
 from lib import util
-from base import TTSBackendBase
+from .base import TTSBackendBase
 
 def getDLLPath():
     p = os.path.join(util.profileDirectory(),'nvdaControllerClient32.dll')

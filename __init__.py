@@ -4,23 +4,23 @@ import sys, os
 sys.path.insert(0,os.path.dirname(__file__))
 
 from lib import util
-from base import LogOnlyTTSBackend
-from nvda import NVDATTSBackend
-from festival import FestivalTTSBackend
-from pico2wave import Pico2WaveTTSBackend
-from flite import FliteTTSBackend
-from osxsay import OSXSayTTSBackend
-from sapi import SAPITTSBackend
-from espeak import ESpeakTTSBackend, ESpeakCtypesTTSBackend
-from speechdispatcher import SpeechDispatcherTTSBackend
-from jaws import JAWSTTSBackend
-from speech_server import SpeechServerBackend
-from cepstral import CepstralTTSBackend #, CepstralTTSOEBackend
+from .base import LogOnlyTTSBackend
+from .nvda import NVDATTSBackend
+from .festival import FestivalTTSBackend
+from .pico2wave import Pico2WaveTTSBackend
+from .flite import FliteTTSBackend
+from .osxsay import OSXSayTTSBackend
+from .sapi import SAPITTSBackend
+from .espeak import ESpeakTTSBackend, ESpeakCtypesTTSBackend
+from .speechdispatcher import SpeechDispatcherTTSBackend
+from .jaws import JAWSTTSBackend
+from .speech_server import SpeechServerBackend
+from .cepstral import CepstralTTSBackend #, CepstralTTSOEBackend
 # from google import GoogleTTSBackend
 # from speechutil import SpeechUtilComTTSBackend
-from recite import ReciteTTSBackend
+from .recite import ReciteTTSBackend
 #from voiceover import VoiceOverBackend #Can't test
-from termux import TermuxTTSBackend
+from .termux import TermuxTTSBackend
 
 
 backendsByPriority = [  SAPITTSBackend,

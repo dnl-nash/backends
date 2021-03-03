@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os, subprocess
-from base import SimpleTTSBackendBase
+from .base import SimpleTTSBackendBase
 
 class FestivalTTSBackend(SimpleTTSBackendBase):
     provider = 'Festival'
@@ -53,7 +53,7 @@ class FestivalTTSBackend(SimpleTTSBackendBase):
             d = p.communicate('(voice.list)')
             import xbmc
             xbmc.log(repr(d), xbmc.LOGNOTICE)
-            l = map(str.strip,d[0].rsplit('> (',1)[-1].rsplit(')',1)[0].split(' '))
+            l = list(map(str.strip,d[0].rsplit('> (',1)[-1].rsplit(')',1)[0].split(' ')))
             if l: return [(v,v) for v in l]
         return None
 
