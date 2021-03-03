@@ -52,7 +52,7 @@ class FestivalTTSBackend(SimpleTTSBackendBase):
             p = subprocess.Popen(['festival','-i'],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
             d = p.communicate('(voice.list)')
             import xbmc
-            xbmc.log(repr(d), xbmc.LOGNOTICE)
+            xbmc.log(repr(d), xbmc.LOGINFO)
             l = list(map(str.strip,d[0].rsplit('> (',1)[-1].rsplit(')',1)[0].split(' ')))
             if l: return [(v,v) for v in l]
         return None
