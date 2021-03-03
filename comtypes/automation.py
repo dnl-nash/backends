@@ -218,7 +218,8 @@ class tagVARIANT(Structure):
         _VariantClear(self)
         if value is None:
             self.vt = VT_NULL
-        elif hasattr(value, '__len__') and len(value) == 0:
+        elif (hasattr(value, '__len__') and len(value) == 0
+                and not isinstance(value, basestring)):
             self.vt = VT_NULL
         # since bool is a subclass of int, this check must come before
         # the check for int
@@ -300,7 +301,7 @@ class tagVARIANT(Structure):
         elif npsupport.isndarray(value):
             # Try to convert a simple array of basic types.
             descr = value.dtype.descr[0][1]
-            typ = npsupport.numpy.ctypeslib._typecodes.get(descr)
+            typ = npsupport.typecodes.get(descr)
             if typ is None:
                 # Try for variant
                 obj = _midlSAFEARRAY(VARIANT).create(value)
@@ -856,6 +857,9 @@ _ctype_to_vartype = {
     # such a typelib, although calling ths method will fail because
     # such an array cannot be created.
     POINTER(VARIANT): VT_BYREF|VT_VARIANT,
+
+    # This is needed to import Esri ArcObjects (esriSystem.olb).
+    POINTER(BSTR): VT_BYREF|VT_BSTR,
 
     # These are not yet implemented:
 ##    POINTER(IUnknown): VT_UNKNOWN,

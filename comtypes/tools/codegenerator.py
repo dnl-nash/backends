@@ -2,11 +2,17 @@
 # libraries.
 import os
 import cStringIO
+import keyword
+import ctypes
+
 from comtypes.tools import typedesc
+import comtypes
 import comtypes.client
 import comtypes.client._generate
 
-version = "$Rev$"[6:-2]
+version = comtypes.__version__
+
+__warn_on_munge__ = __debug__
 
 
 class lcid(object):
@@ -254,7 +260,17 @@ class Generator(object):
 
         for line in wrapper.wrap(text):
             print >> self.output, line
-        print >> self.output, "from comtypes import _check_version; _check_version(%r)" % version
+
+        tlib_mtime = None
+        if self.filename is not None:
+            # get full path to DLL first (os.stat can't work with relative DLL paths properly)
+            loaded_typelib = comtypes.typeinfo.LoadTypeLib(self.filename)
+            full_filename = comtypes.tools.tlbparser.get_tlib_filename(loaded_typelib)
+
+            # get DLL timestamp at the moment of wrapper generation
+            tlib_mtime = os.stat(full_filename).st_mtime
+
+        print >> self.output, "from comtypes import _check_version; _check_version(%r, %f)" % (version, tlib_mtime)
         return loops
 
     def type_name(self, t, generate=True):
@@ -345,6 +361,11 @@ class Generator(object):
     _enumvalues = 0
     def EnumValue(self, tp):
         value = int(tp.value)
+        if keyword.iskeyword(tp.name):
+            # XXX use logging!
+            if __warn_on_munge__:
+                print "# Fixing keyword as EnumValue for %s" % tp.name
+            tp.name += "_"
         print >> self.stream, \
               "%s = %d" % (tp.name, value)
         self.names.add(tp.name)

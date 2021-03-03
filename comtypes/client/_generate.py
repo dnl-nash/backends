@@ -3,19 +3,12 @@ import os
 import sys
 import comtypes.client
 import comtypes.tools.codegenerator
+import importlib
 
 import logging
 logger = logging.getLogger(__name__)
 
-__verbose__ = __debug__
-
-if os.name == "ce":
-    # Windows CE has a hard coded PATH
-    # XXX Additionally there's an OEM path, plus registry settings.
-    # We don't currently use the latter.
-    PATH = ["\\Windows", "\\"]
-else:
-    PATH = os.environ["PATH"].split(os.pathsep)
+PATH = os.environ["PATH"].split(os.pathsep)
 
 def _my_import(fullname):
     # helper function to import dotted modules
@@ -39,8 +32,8 @@ def GetModule(tlib):
     """Create a module wrapping a COM typelibrary on demand.
 
     'tlib' must be an ITypeLib COM pointer instance, the pathname of a
-    type library, or a tuple/list specifying the arguments to a
-    comtypes.typeinfo.LoadRegTypeLib call:
+    type library, a COM CLSID GUID, or a tuple/list specifying the
+    arguments to a comtypes.typeinfo.LoadRegTypeLib call:
 
       (libid, wMajorVerNum, wMinorVerNum, lcid=0)
 
@@ -95,6 +88,19 @@ def GetModule(tlib):
         logger.debug("GetModule(%s)", tlib)
         pathname = tlib
         tlib = comtypes.typeinfo.LoadTypeLibEx(tlib)
+    elif isinstance(tlib, comtypes.GUID):
+        # tlib contain a clsid
+        clsid = str(tlib)
+        
+        # lookup associated typelib in registry
+        import _winreg
+        with _winreg.OpenKey(_winreg.HKEY_CLASSES_ROOT, r"CLSID\%s\TypeLib" % clsid, 0, _winreg.KEY_READ) as key:
+            typelib = _winreg.EnumValue(key, 0)[1]
+        with _winreg.OpenKey(_winreg.HKEY_CLASSES_ROOT, r"CLSID\%s\Version" % clsid, 0, _winreg.KEY_READ) as key:
+            version = _winreg.EnumValue(key, 0)[1].split(".")
+        
+        logger.debug("GetModule(%s)", typelib)
+        tlib = comtypes.typeinfo.LoadRegTypeLib(comtypes.GUID(typelib), int(version[0]), int(version[1]), 0)
     elif isinstance(tlib, (tuple, list)):
         # sequence containing libid and version numbers
         logger.debug("GetModule(%s)", (tlib,))
@@ -127,8 +133,7 @@ def GetModule(tlib):
     else:
         return mod
     # the module is always regenerated if the import fails
-    if __verbose__:
-        print "# Generating comtypes.gen.%s" % modulename
+    logger.info("# Generating comtypes.gen.%s", modulename)
     # determine the Python module name
     fullname = _name_module(tlib)
     modname = fullname.split(".")[-1]
@@ -146,6 +151,9 @@ def GetModule(tlib):
     ofi = open(os.path.join(comtypes.client.gen_dir, modulename + ".py"), "w")
     ofi.write(code)
     ofi.close()
+    # clear the import cache to make sure Python sees newly created modules
+    if hasattr(importlib, "invalidate_caches"):
+        importlib.invalidate_caches()
     return _my_import("comtypes.gen." + modulename)
 
 def _CreateWrapper(tlib, pathname=None):
@@ -171,8 +179,7 @@ def _CreateWrapper(tlib, pathname=None):
     else:
         ofi = open(os.path.join(comtypes.client.gen_dir, modname + ".py"), "w")
     # XXX use logging!
-    if __verbose__:
-        print "# Generating comtypes.gen.%s" % modname
+    logger.info("# Generating comtypes.gen.%s", modname)
     generate_module(tlib, ofi, pathname)
 
     if comtypes.client.gen_dir is None:
@@ -185,6 +192,9 @@ def _CreateWrapper(tlib, pathname=None):
         setattr(comtypes.gen, modname, mod)
     else:
         ofi.close()
+        # clear the import cache to make sure Python sees newly created modules
+        if hasattr(importlib, "invalidate_caches"):
+            importlib.invalidate_caches()
         mod = _my_import(fullname)
     return mod
 
