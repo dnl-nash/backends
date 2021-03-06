@@ -19,7 +19,7 @@ except:
 
 def check_snd_bm2835():
     try:
-        return 'snd_bcm2835' in subprocess.check_output(['lsmod'])
+        return 'snd_bcm2835' in subprocess.check_output(['lsmod']).decode('utf-8')
     except:
         util.ERROR('check_snd_bm2835(): lsmod filed',hide_tb=True)
     return False
@@ -497,7 +497,7 @@ class WavAudioPlayerHandler(BasePlayerHandler):
 
     def getOutFile(self,text):
         if self._player.needsHashedFilename:
-            self.outFile = self.outFileBase % hashlib.md5(text).hexdigest()
+            self.outFile = self.outFileBase % hashlib.md5(text.encode('utf-8')).hexdigest()
         return self.outFile
 
     def setSpeed(self,speed):

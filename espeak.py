@@ -82,7 +82,7 @@ class ESpeakTTSBackend(base.SimpleTTSBackendBase):
             out = subprocess.check_output(['espeak','--voices']).splitlines()
             out.pop(0)
             for l in out:
-                voice = re.split('\s+',l.strip(),5)[3]
+                voice = re.split('\s+',l.decode('utf-8').strip(),5)[3].replace('_',' ')
                 ret.append((voice,voice))
             return ret
         return None
