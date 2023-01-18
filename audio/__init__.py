@@ -5,13 +5,14 @@ from lib import util
 
 try:
     import xbmc
+    import xbmcvfs
 except:
     xbmc = None
 
 PLAYSFX_HAS_USECACHED = False
 
 try:
-    voidWav = os.path.join(xbmc.translatePath(util.xbmcaddon.Addon().getAddonInfo('path')).decode('utf-8'),'resources','wavs','void.wav')
+    voidWav = os.path.join(xbmcvfs.translatePath(util.xbmcaddon.Addon().getAddonInfo('path')).decode('utf-8'),'resources','wavs','void.wav')
     xbmc.playSFX(voidWav,False)
     PLAYSFX_HAS_USECACHED = True
 except:
