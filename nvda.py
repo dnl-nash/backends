@@ -22,13 +22,11 @@ class NVDATTSBackend(TTSBackendBase):
     @staticmethod
     def available():
         dllPath = getDLLPath()
-        if not dllPath or not windll:
+        if (dllPath==None):
             return False
         try:
             dll = ctypes.windll.LoadLibrary(dllPath)
             res = dll.nvdaController_testIfRunning() == 0
-            ctypes.windll.kernel32.FreeLibrary(dll._handle)
-            del dll
             return res
         except:
             return False
