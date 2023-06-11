@@ -4,21 +4,11 @@ from lib import util
 from .base import TTSBackendBase
 
 def getDLLPath():
-    p = os.path.join(util.profileDirectory(),'nvdaControllerClient32.dll')
-    if os.path.exists(p): return p
     p = os.path.join(util.backendsDirectory(),'nvda','nvdaControllerClient32.dll')
-    if os.path.exists(p): return p
-    try:
-        import xbmc
-        if xbmc.getCondVisibility('System.HasAddon(script.module.nvdacontrollerclient)'):
-            if util.DEBUG: util.LOG('Found script.module.nvdacontrollerclient module for NVDA')
-            import xbmcaddon
-            nvdaCCAddon = xbmcaddon.Addon('script.module.nvdacontrollerclient')
-            p = os.path.join(nvdaCCAddon.getAddonInfo('path').decode('utf-8'),'nvda','nvdaControllerClient32.dll')
-            if os.path.exists(p): return p
-    except (ImportError,AttributeError):
+    if os.path.exists(p):
+        return p
+    else:
         return None
-    return None
 
 try:
     from ctypes import windll
